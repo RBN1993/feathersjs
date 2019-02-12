@@ -17,7 +17,7 @@ describe('URL Hooks', () => {
       jest.resetAllMocks()
     })
 
-    test('it calls `create` method on `visits` service', async () => {
+    it('it calls `create` method on `visits` service', async () => {
       fakeService.create.mockImplementation(() => {
         return Promise.resolve()
       })
@@ -35,7 +35,7 @@ describe('URL Hooks', () => {
       expect(result).toBe(testCtx)
     })
 
-    test('if create call throws, it returns a rejected promise', async () => {
+    it('if create call throws, it returns a rejected promise', async () => {
       fakeService.create.mockRejectedValue(new Error('Error from create'))
 
       await expect(registerVisit(ctx)).rejects.toThrow(/create/)
@@ -43,7 +43,7 @@ describe('URL Hooks', () => {
   })
 
   describe('removeVisit', () => {
-    test('it calls remove visit and set result to true', async () => {
+    it('it calls remove visit and set result to true', async () => {
       fakeService.remove.mockResolvedValue(true)
       const newContext = await removeVisit({ ...ctx, result: 'url.com' })
       expect(newContext).toHaveProperty('result', true)
