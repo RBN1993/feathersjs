@@ -1,67 +1,25 @@
-const feathers = require("@feathersjs/feathers")
-const express = require("@feathersjs/express")
+const feathers = require('@feathersjs/feathers')
+const express = require('@feathersjs/express')
+const redis = require('redis')
+const configureServices = require('./services')
+const configureHooks = require('./hooks')
 
 const app = express(feathers())
-
 app.use(express.json())
 app.configure(express.rest())
 
-app.use("todos", {
-  async get(name) {
-    console.log("GET TODOS", name)
-    return { name, createdAt: Date.now() }
-  },
-  async find() {
-    throw new Error("Error find")
-    return []
-  },
-  async create(data) {
-    return data
-  }
+//Redis
+const client = redis.createClient(6379, 'localhost')
+client.on('err', err => console.error(err))
+client.on('connect', function() {
+  console.log('Redis client connected')
 })
 
-const addCreatedAt = fieldName => ctx => {
-  ctx.data[fieldName] = Date.now()
-  return ctx
-}
+app.set('redisClient', client)
 
-const logger = ctx => {
-  console.log("id", ctx.id)
-  console.log("data", ctx.data)
-  console.log("result", ctx.result)
-  console.log("params", ctx.params)
-  return ctx
-}
+configureServices(app)
+configureHooks(app)
 
-const _cacheTodos = {}
-
-const readFromCache = ctx => {
-  if (_cacheTodos[ctx.id]) {
-    ctx.result = { ..._cacheTodos[ctx.id], fromCache: true }
-  }
-  return ctx
-}
-const writeToCache = ctx => {
-  _cacheTodos[ctx.id] = ctx.result
-  return ctx
-}
-
-app.service("todos").hooks({
-  before: {
-    all: [logger],
-    create: [addCreatedAt("createdAt"), addCreatedAt("updatedAt")],
-    get: [readFromCache]
-  },
-  // db
-  after: {
-    create(context) {
-      context.result.url = "goog.com"
-      //console.log("after context: ", context)
-      return context
-    },
-    get: [writeToCache]
-  }
-})
 app.use(express.errorHandler())
 
-app.listen(3000, () => console.log("Escuchando..."))
+app.listen(3000, () => console.log('Escuchando...'))
