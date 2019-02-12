@@ -41,8 +41,10 @@ module.exports = function UrlServiceFactory(client) {
       return url
     })
   }
-
-  // listar todos los pares Url : codigo
+  /**
+   * list-all url pairs : codigo
+   * @returns {Promise<Array>} URLS
+   */
   function find() {
     return redisAsync.hgetall(URLS_HASH).then(data => {
       if (!data) return []
@@ -53,7 +55,11 @@ module.exports = function UrlServiceFactory(client) {
       }))
     })
   }
-
+  /**
+   *
+   * @param {String} shortUrl
+   * @returns {Promise<String>} url
+   */
   function remove(shortUrl) {
     return get(shortUrl).then(url => {
       return redisAsync
