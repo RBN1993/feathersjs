@@ -1,16 +1,11 @@
 const errors = require('@feathersjs/errors')
+const { validateRegEx } = require('../common')
 
-const validateUrl = () => {
-  const urlRegEx = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm
-  const compiled = new RegExp(urlRegEx)
-  return ctx => {
-    const { url } = ctx.data
-    if (compiled.test(url)) {
-      return ctx
-    }
-    throw new errors.NotAcceptable('Invalid url')
-  }
-}
+const validateUrl = validateRegEx({
+  exp: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm,
+  propName: 'url',
+  mssg: 'Invalid url'
+})
 
 const registerVisit = ctx => {
   const visitService = ctx.app.service('visits')

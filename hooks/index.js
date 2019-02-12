@@ -1,5 +1,5 @@
 const { validateUrl, registerVisit, removeVisit } = require('./urls')
-
+const { validateEmail } = require('./users')
 module.exports = function configureHooks(app) {
   app.hooks({
     before: {
@@ -8,10 +8,14 @@ module.exports = function configureHooks(app) {
       }
     }
   })
-
+  app.service('users').hooks({
+    before: {
+      create: validateEmail
+    }
+  })
   app.service('urls').hooks({
     before: {
-      create: validateUrl()
+      create: validateUrl
     },
     after: {
       get: registerVisit,
