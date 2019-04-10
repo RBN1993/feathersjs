@@ -1,0 +1,41 @@
+version: '3.0'
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=3000 # If changes, change ports below
+      - MONGO_HOST=db
+      - MONGO_USER=rgb
+      - MONGO_PWD=admin123
+      - MONGO_DB=blog
+    volumes:
+      - ./:/app
+      - ./seeds:/app/seeds
+      - ./uploads:/app/uploads
+      - /app/node_modules
+    links:
+      - db
+      - redis
+    ports:
+      - '3000:3000'
+    command: bash -c "yarn && yarn dev"
+
+  db:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+      - ./mongodata:/data/db # mount a volume so that data is not lost between reebots
+      - ./seeds:/seeds
+    ports:
+      - '27017:27017' # export mongo port to the host (your machine) so you can connect to it with GUIs
+  redis:
+    image: redis:latest
+    volumes:
+      - ./redis-data:/data
+    ports:
+      - '6379:6379'
+  driver:
+    build: .
+    links:
+      - redis

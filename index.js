@@ -9,12 +9,22 @@ const app = express(feathers())
 app.use(express.json())
 app.configure(express.rest())
 
-const urlMongo = 'mongodb://127.0.0.1:27017/blog'
-mongoose.connect(urlMongo)
+const urlMongo = `mongodb://${process.env.MONGO_HOST}/${process.env.MONGO_DB}`
 
+mongoose.connection.on('reconnect', () => {
+  console.log('Mongo reconnected')
+})
+mongoose
+  .connect(urlMongo, { autoReconnect: true })
+  .then(() => {
+    console.log('Connected to Mongo')
+  })
+  .catch(err => {
+    console.error('Error connecting to Mongo', err.message)
+  })
 //Redis
-const client = redis.createClient(6379, 'localhost')
-client.on('err', err => console.error(err))
+const client = redis.createClient({ host: 'redis' })
+client.on('err', err => console.error(`Error al conectar redis ${err}`))
 client.on('connect', function() {
   console.log('Redis client connected')
 })
